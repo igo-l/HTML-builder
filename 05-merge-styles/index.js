@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const directoryFirst = path.join(__dirname, "styles");
 const directorySecond = path.join(__dirname, "project-dist");
-const filesCopyPath = path.join(directoryFirst, "bundle.css");
+const filesCopyPath = path.join(directorySecond, "bundle.css");
 fs.readdir(directoryFirst, { withFileTypes: true }, function (err, files) {
     fs.writeFile(filesCopyPath, "", function(err) {
         if(err) {
