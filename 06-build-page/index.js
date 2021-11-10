@@ -6,21 +6,23 @@ const cPath = path.join(__dirname, 'components');
 const indexHTMLPath = path.join(__dirname, 'project-dist' , 'index.html');
 const stCssPath = path.join(__dirname, 'project-dist/style.css');
 const fPathStyle = path.join(__dirname, 'styles');
-const filePathSt = path.join(__dirname, 'assets');
+const filePathF = path.join(__dirname, 'assets');
 const filePathSec = path.join(__dirname, 'project-dist/assets');
 
- fs.access(mFolderPath, fs.F_OK, (err) => {
+function start(folder) {
+  fs.access(folder, fs.F_OK, (err) => {
     if (err) {
-      fs.mkdir(mFolderPath, (err) => {
+      fs.mkdir(folder, (err) => {
         if (err) {
           throw err;
         }
-        console.log(`Create folder: ${path.basename(mFolderPath)}.`);
+        console.log(`Create folder: ${path.basename(folder)}.`);
       })
     }
   })
+}
 
-function chTemplate() {
+function changeTemplate() {
   const stream = fs.createReadStream(tPath, 'utf-8');
   const indexHtml = fs.createWriteStream(indexHTMLPath);
   let html = '';
@@ -31,9 +33,9 @@ function chTemplate() {
       if (err) {
         throw err;
       }
-      let arr = [];
+      let array = [];
       for (let file of components) {
-        arr.push(`{{${path.parse(file.name).name}}}`)
+        array.push(`{{${path.parse(file.name).name}}}`)
       }
       fs.promises.readdir(cPath)
       .then(components => {
@@ -41,21 +43,19 @@ function chTemplate() {
           const componentPath = path.join(__dirname, 'components', file);
           const readableStream = fs.createReadStream(componentPath);
           readableStream.on('data', chunk => {
-            html = html.replace(arr[index], chunk);
-            if (index === arr.length - 1) {
+            html = html.replace(array[index], chunk);
+            if (index === array.length - 1) {
              indexHtml.write(html);
             }
-            console.log(`Template: ${path.parse(componentPath).name} / Added to ${path.basename(indexHTMLPath)}.`);
+            console.log(`Template: ${path.parse(componentPath).name} /  Added to ${path.basename(indexHTMLPath)}.`);
           })
         })
       })
     })
   })
 }
-
-function mergeFiles() {
+function mergeStyleCssFile() {
   fs.promises.readdir(fPathStyle, { withFileTypes: true })
-
   .then(elements => {
     for (let file of elements) {
       if (file.isFile()) {
@@ -76,32 +76,22 @@ function mergeFiles() {
       }
     }
   })
-
   .catch(err => {
-    console.log(err);
+    console.log(err)
   })
 }
 
 function clearCssFile() {
   fs.truncate(stCssPath, 0, (err) => {
     if (err) {
-      throw err;
+      throw err
     }
     console.log(`${path.basename(stCssPath)} cleared.`)})
 }
 
-function cpyAssetsFiles() {
-  fs.access(filePathSec, fs.F_OK, (err) => {
-    if (err) {
-      fs.mkdir(filePathSec, (err) => {
-        if (err) {
-          throw err;
-        }
-        console.log(`Create folder: ${path.basename(filePathSec)}.`);
-      })
-    }
-  })
-  fs.readdir(filePathSt, (err, elements) => {
+function copyAssetsFile() {
+  start(filePathSec);
+  fs.readdir(filePathF, (err, elements) => {
     if (err) {
       throw err;
     }
@@ -111,25 +101,34 @@ function cpyAssetsFiles() {
           throw err;
         }
       });
-      const assetsOriginFolder = path.join(filePathSt, el);
+      const assetsOriginFolder = path.join(filePathF, el);
       const assetsCopyFolder = path.join(filePathSec, el);
       fs.readdir(assetsOriginFolder, (err, items) => {
         if (err) {
-          throw err;
+          throw err
         }
         for (const item of items) {
             fs.copyFile(path.join(assetsOriginFolder, item), path.join(assetsCopyFolder, item), fs.constants.COPYFILE_EXCL, (err) => {
                 if (err) {
                   process.exit();
                 }
-                console.log(`Сopied: ${item}/ Folder: ${path.basename(assetsCopyFolder)}.`);
+                console.log(`Copied: ${item} / To folder: ${path.basename(assetsCopyFolder)}`);
             });
         }
     });
     }
   })
 }
-
-chTemplate();
-mergeFiles();
-cpyAssetsFiles();
+function build() {
+  start(mFolderPath);
+  setTimeout(() => {
+    changeTemplate();
+  }, 500);
+  setTimeout(() => {
+    mergeStyleCssFile();
+  }, 500);
+  setTimeout(() => {
+    copyAssetsFile();
+  }, 500);
+}
+build();
