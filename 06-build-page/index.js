@@ -9,8 +9,8 @@ const fPathStyle = path.join(__dirname, 'styles');
 const filePathF = path.join(__dirname, 'assets');
 const filePathSec = path.join(__dirname, 'project-dist/assets');
 
-function start(folder) {
-  fs.access(folder, fs.F_OK, (err) => {
+async function start(folder) {
+  await fs.access(folder, fs.F_OK, (err) => {
     if (err) {
       fs.mkdir(folder, (err) => {
         if (err) {
@@ -22,7 +22,7 @@ function start(folder) {
   })
 }
 
-function changeTemplate() {
+async function changeTemplate() {
   const stream = fs.createReadStream(tPath, 'utf-8');
   const indexHtml = fs.createWriteStream(indexHTMLPath);
   let html = '';
@@ -37,7 +37,7 @@ function changeTemplate() {
       for (let file of components) {
         array.push(`{{${path.parse(file.name).name}}}`)
       }
-      fs.promises.readdir(cPath)
+   fs.promises.readdir(cPath)
       .then(components => {
         components.forEach((file, index) => {
           const componentPath = path.join(__dirname, 'components', file);
@@ -54,8 +54,8 @@ function changeTemplate() {
     })
   })
 }
-function mergeStyleCssFile() {
-  fs.promises.readdir(fPathStyle, { withFileTypes: true })
+async function mergeStyleCssFile() {
+ await fs.promises.readdir(fPathStyle, { withFileTypes: true })
   .then(elements => {
     for (let file of elements) {
       if (file.isFile()) {
@@ -81,17 +81,17 @@ function mergeStyleCssFile() {
   })
 }
 
-function clearCssFile() {
-  fs.truncate(stCssPath, 0, (err) => {
+async function clearCssFile() {
+  await fs.truncate(stCssPath, 0, (err) => {
     if (err) {
       throw err
     }
     console.log(`${path.basename(stCssPath)} cleared.`)})
 }
 
-function copyAssetsFile() {
-  start(filePathSec);
-  fs.readdir(filePathF, (err, elements) => {
+async function copyAssetsFile() {
+  await start(filePathSec);
+  await fs.readdir(filePathF, (err, elements) => {
     if (err) {
       throw err;
     }
@@ -119,8 +119,8 @@ function copyAssetsFile() {
     }
   })
 }
-function build() {
-  start(mFolderPath);
+async function build() {
+  await start(mFolderPath);
   setTimeout(() => {
     changeTemplate();
   }, 500);
